@@ -1,0 +1,20 @@
+{
+  "name": "murray-music",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "electron": "^42.4.0",
+    "preact": "^10.29.1",
+    "preact-iso": "^2.12.0"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.5",
+    "vite": "^8.0.12"
+  }
+}

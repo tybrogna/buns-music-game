@@ -1,0 +1,48 @@
+{
+    "music": {
+        "jrpg": [
+            {
+                "title": "Schala's Theme",
+                "composer": "Yasunori Mitsuda",
+                "game": "Chrono Trigger",
+                "year": 1995,
+                "soundFile": "sound/schala.mp3",
+                "startTime": "0",
+                "backgroundImg": "bg/ct.jpg",
+                "albumImg": "album/ct.jpg"
+            },
+            {
+                "title": "A New Hope",
+                "composer": "Masayoshi Soken",
+                "game": "Final Fantasy XIV",
+                "year": 2013,
+                "soundFile": "sound/uldah.mp3",
+                "startTime": "0",
+                "backgroundImg": "bg/uldah.jpg",
+                "albumImg": "album/xivarr.jpg"
+            }
+        ],
+        "rts": [
+            {
+                "title": "Terran One",
+                "composer": "Glenn Stafford",
+                "game": "Starcraft",
+                "year": 1997,
+                "soundFile": "sound/terran.mp3",
+                "startTime": "20",
+                "backgroundImg": "bg/starcraft.jpg",
+                "albumImg": "album/starcraft.jpg"
+            },
+            {
+                "title": "Hell March",
+                "composer": "Frank Klepacki",
+                "game": "Command & Conquer: Red Alert",
+                "year": 1995,
+                "soundFile": "sound/schala.mp3",
+                "startTime": "19",
+                "backgroundImg": "bg/cncra.jpg",
+                "albumImg": "album/cncra.jpg"
+            }
+        ]
+    }
+}

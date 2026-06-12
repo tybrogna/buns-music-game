@@ -1,0 +1,65 @@
+export function delay(ms) {
+    return new Promise(resolve => { setTimeout(resolve, ms) })
+}
+
+export function isLocalhost() {
+    return location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === ""
+}
+
+export function chunkList(list, size=10) {
+    let chunks = []
+    for (let a = 0; a < list.length; a += size) {
+        let chunk = list.slice(a, a + size)
+        chunks.push(chunk)
+    }
+    return chunks
+}
+
+/***
+ * Jquery style $
+ * @param {string} cssSelector - CSS selector string
+ * @return {Element} - first matching Element
+ * should probably just use jquery, its small enough. im just not clear on the other benefits
+ * i just remembered i used it in the nominees portion, so itll be in later anyways
+ * TODO delete this
+ */
+export function $(cssSelector) {
+    return document.querySelector(cssSelector)
+}
+
+export function $$$(cssSelector) {
+    return document.querySelectorAll(cssSelector)
+}
+
+/***
+ * Python style range function
+ * @param {number} from - start value, default 0
+ * @param {number} to - optional end value, exclusive
+ * range(5) -> [0,1,2,3,4], range(2,5) -> [2,3,4]
+ */
+export function range(from, to = null) {
+    if (to == null) { to = from; from = 0 }
+    let init = from, retArr = new Array(to - from)
+    while (from < to) { retArr[from - init] = from++ }
+    return retArr
+}
+
+export function objectSort(obj, member) {
+    obj.sort((a, b) => {
+        const nameA = a[member].toUpperCase(); // ignore upper and lowercase
+        const nameB = b[member].toUpperCase(); // ignore upper and lowercase
+    if (nameA < nameB) {
+        return -1;
+    }
+    if (nameA > nameB) {
+        return 1;
+    }
+
+    // names must be equal
+        return 0;
+    });
+}
+
+export function utcNow() {
+    return Math.floor(new Date().getTime() / 1000)
+}
