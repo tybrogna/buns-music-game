@@ -1,7 +1,6 @@
 import { render } from 'preact'
 import { useState, useEffect } from 'preact/hooks'
 import { $, $$$, range } from './helpers.js'
-import * as fs from 'fs'
 import * as Settings from './settings.js'
 // import './landing.css'
 
@@ -59,13 +58,19 @@ function testWrite(event) {
     })
     const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json',
-    });
+    }); 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `test.json`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+async function testFolder(event) {
+    let result = await window.eapi.call('testhello', null)
+    // let result = await eapi.call('testhello', `C:\\Users\\tybro\\Projects\\buns-music-game\\data\\albums`)
+    console.log(result)
 }
 
 // async function testRead(target) {
@@ -82,10 +87,10 @@ function DataTableRows(props) {
     console.log(soundLocation)
     console.log(albumArtLocation)
     console.log(bgLocation)
-    try {
-        let soundFiles = fs.readdirSync(`./../data/${soundLocation}`)
-        soundFiles.forEach(f => console.log(f))
-    } catch (err) { console.log(err) }
+    // try {
+    //     let soundFiles = readdirSync(`./../data/${soundLocation}`)
+    //     soundFiles.forEach(f => console.log(f))
+    // } catch (err) { console.log(err) }
 
     let Objs = Object.entries(props.songsData.music).map(([key, value]) => {
 
@@ -142,6 +147,7 @@ function TestingBlock() {
             <div>
                 <input type='button' value='console.log teams' onClick={e => console.log(localStorage.getItem('teams'))} />
                 <input type='button' value='console.log players' onClick={e => console.log(localStorage.getItem('players'))} />
+                <input type='button' value='check folder' onClick={e => testFolder()} />
                 <input type='button' value='write test file' onClick={e => testWrite()} />
                 <input type='file' value='open data file' accept='application/json' onChange={e => testRead(e.target)} />
             </div>

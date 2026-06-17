@@ -62,6 +62,7 @@ function Landing() {
         <div id='shell'>
             <LogoBox />
             <TeamSetup />
+            <a href='/files'>file viewer</a>
             <input type='button' value='Start Game' onclick={e => startGame()}/>
         </div>
     )
