@@ -17,27 +17,45 @@ function GameScreen() {
         let filesInFolder = await window.nodejs.call('filesInFolder', `./games/${selectedGameFolder}`)
         let jsonFile = filesInFolder.filter(item => item.endsWith('.json'))[0]  // first json file in folder
         let jsonData = await window.nodejs.call('readFile', `./games/${selectedGameFolder}/${jsonFile}`)
-        Object.values(jsonData.music).forEach(category => {
+        Object.entries(jsonData.music).forEach(([category, songs]) => {
             // console.log(category)
-            category.forEach(song => song.played = false)
+            songs.forEach(song => song.played = false)
         })
         game = jsonData
         console.log(game)
         setHaveGame(true)
     }, [])
 
+    let openOverlay = (event) => {
+        $('#player-overlay').style.display = 'block'
+    }
+
+    let closeOverlay = (event) => {
+        console.log('closing overlay')
+        $('#player-overlay').style.display = 'none'
+        let lastSongPlayed = unplayedSongs(selectedSong).length == 0
+        if (lastSongPlayed) {
+            console.log(selectedSong)
+            console.log($(`#${selectedSong}-tile`))
+            $(`#${selectedSong}-tile`).style.background = 'grey'
+        }
+        setSelectedSong('')
+    }
+
     if (!haveGame) {
         return (
             <div>loading...</div>
         )
     } else {
+
+        let categories = Object.keys(game.music)
         return (
             <div className='shell'>
-                <CategoryGrid categories={Object.keys(game.music)} selectFunc={setSelectedSong} />
-                <input type='button' value='overlay' onClick={e => $('#player-overlay').style.display = 'block'} />
+                <CategoryGrid categories={categories} selectFunc={setSelectedSong} />
+                <input type='button' value='overlay' onClick={openOverlay} />
                 <Teams />
-                <div id='player-overlay' onClick={e => e.target.style.display = 'none'}>
-                    {selectedSong}
+                <div id='player-overlay' onClick={closeOverlay}>
+                    <MusicPlayer category={selectedSong} />
                 </div>
             </div>
         )
@@ -45,7 +63,7 @@ function GameScreen() {
 }
 
 function CategoryGrid(props) {
-    let catNames = shuffle(props.categories)
+    let catNames = props.categories
     //give the categories random colors
 
     let CategoryTiles = catNames.map((catName) => { 
@@ -66,19 +84,40 @@ function CategoryGrid(props) {
 // 
 
 function CategoryTile(props) {
+    let [remaining, setRemaining] = useState(unplayedSongs(props.title).length)
+    let id = props.title + '-tile'
+    let labelText = `${props.title} -- ${remaining}`
+
+    let playSong = async (e) => {
+        console.log(e.target)
+        console.log(e.target.id)
+        let categoryKey = e.target.id.substr(0, e.target.id.indexOf('-'))
+        console.log(categoryKey)
+        props.selectFunc(categoryKey)
+        if (remaining > 0) {
+            setRemaining(remaining - 1)
+        }
+
+        if (remaining == 0) {
+            $(`#${categoryKey}-tile`).style.background = 'grey'
+        }
+    }
+
     return (
-        <div class='category-tile-flex-item border-1' onClick={e => {props.selectFunc(e.target.innerHTML)}}>
-            {props.title}
+        <div id={id} class='category-tile-flex-item border-1' onClick={playSong}>
+            {labelText}
         </div>
     )
 }
 
 function Teams() {
+    let [score, setScore] = useState(0)
     let TeamColumns = Object.entries(teams).map(([name, players]) => {
         return (
             <div class='border-1'>
                 {name}
-                <Players players={players} />
+                <PlayerList players={players} />
+                {score}
             </div>
         )
     })
@@ -90,12 +129,39 @@ function Teams() {
     )
 }
 
-function Players(props) {
+function PlayerList(props) {
     return (
         <div class='border-2'>
             {props.players}
         </div>
     )
+}
+
+function MusicPlayer(props) {
+    console.log(props.category)
+    if (!(props.category in game.music)) {
+        console.log('not a category')
+        return
+    }
+
+    let songToPlay = shuffle(unplayedSongs(props.category))[0]
+    if (songToPlay == undefined) {
+        // $(`#${props.category}-tile`).style.background = 'grey'
+        console.log("out of songs to play")
+        return
+    }
+    songToPlay.played = true
+    console.log(songToPlay)
+
+    return (
+        <div>
+            {songToPlay.title}
+        </div>
+    )
+}
+
+function unplayedSongs(category) {
+    return game.music[category].filter(song => !song.played)
 }
 
 function defaultTeams() {
