@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
-import { readdir } from 'fs/promises'
+import { readFile, readdir } from 'fs/promises'
 import { fileURLToPath } from 'url';
+import path from 'path';
 //stolen from
 // https://medium.com/@ignatovich.dm/how-to-set-up-an-electron-app-with-vite-95fa91795298
 //check here too might be useful
@@ -30,13 +30,23 @@ function createWindow () {
     }
 }
 
-ipcMain.handle('testhello', async (event, folder) => {
+ipcMain.handle('test', async (event, folder) => {
     return {success: true, data:'hello'}
-    // try {
-    //     let files = await readdir(folder)
-    //     files.forEach(f => console.log(f))
-    //     return files
-    // } catch (err) { console.log(err); return '' }
+})
+
+ipcMain.handle('filesInFolder', async (event, folder) => {
+    try {
+        let files = await readdir(folder)
+        files.forEach(f => console.log(f))
+        return files
+    } catch (err) { console.log(err); return '' }
+})
+
+ipcMain.handle('readFile', async (event, file) => {
+    try {
+        let data = await readFile(file)
+        return await JSON.parse(data)
+    } catch (err) { console.log(err); return '' }
 })
 
 app.whenReady().then(() => {

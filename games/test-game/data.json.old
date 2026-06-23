@@ -1,0 +1,54 @@
+{
+  "dataLocation": "C:\\Users\\tybro\\Projects\\buns-music-game\\data",
+  "dataFile": "",
+  "soundLocation": "",
+  "bgLocation": "",
+  "albumArtLocation": "",
+  "music": {
+    "jrpg": [
+      {
+        "title": "Schala's Theme",
+        "composer": "Yasunori Mitsuda",
+        "game": "Chrono Trigger",
+        "year": 1995,
+        "soundFile": "schala.mp3",
+        "startTime": "0",
+        "backgroundImg": "ct.jpg",
+        "albumImg": "ct.jpg"
+      },
+      {
+        "title": "A New Hope",
+        "composer": "Masayoshi Soken",
+        "game": "Final Fantasy XIV",
+        "year": 2013,
+        "soundFile": "uldah.mp3",
+        "startTime": "0",
+        "backgroundImg": "uldah.jpg",
+        "albumImg": "xivarr.jpg"
+      }
+    ],
+    "rts": [
+      {
+        "title": "Terran One",
+        "composer": "Glenn Stafford",
+        "game": "Starcraft",
+        "year": 1997,
+        "soundFile": "terran.mp3",
+        "startTime": "20",
+        "backgroundImg": "starcraft.jpg",
+        "albumImg": "starcraft.jpg"
+      },
+      {
+        "title": "Hell March",
+        "composer": "Frank Klepacki",
+        "game": "Command & Conquer: Red Alert",
+        "year": 1995,
+        "soundFile": "hellmarch.mp3",
+        "startTime": "19",
+        "backgroundImg": "cncra.jpg",
+        "albumImg": "cncra.jpg"
+      }
+    ],
+    "nintendo": []
+  }
+}

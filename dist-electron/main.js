@@ -1,6 +1,7 @@
 import { BrowserWindow, app, ipcMain } from "electron";
-import path from "path";
+import { readFile, readdir } from "fs/promises";
 import { fileURLToPath } from "url";
+import path from "path";
 //#region electron/main.js
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
@@ -20,11 +21,30 @@ function createWindow() {
 	if (process.env.VITE_DEV_SERVER_URL) mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
 	else mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
 }
-ipcMain.handle("testhello", async (event, folder) => {
+ipcMain.handle("test", async (event, folder) => {
 	return {
 		success: true,
 		data: "hello"
 	};
+});
+ipcMain.handle("filesInFolder", async (event, folder) => {
+	try {
+		let files = await readdir(folder);
+		files.forEach((f) => console.log(f));
+		return files;
+	} catch (err) {
+		console.log(err);
+		return "";
+	}
+});
+ipcMain.handle("readFile", async (event, file) => {
+	try {
+		let data = await readFile(file);
+		return await JSON.parse(data);
+	} catch (err) {
+		console.log(err);
+		return "";
+	}
 });
 app.whenReady().then(() => {}).then(createWindow);
 app.on("window-all-closed", () => {

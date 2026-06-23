@@ -6,6 +6,22 @@ export function isLocalhost() {
     return location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === ""
 }
 
+// I also got this from somewhere, and have now been copying it around. Classic shuffle algo
+export function shuffle(list, random=Math.random) {
+    let shuffleList = [...list]
+    let a = shuffleList.length;
+    let tval, rand;
+
+    while (a != 0) {
+        rand = Math.floor(random() * a);
+        a --;
+        tval = shuffleList[a];
+        shuffleList[a] = shuffleList[rand];
+        shuffleList[rand] = tval;
+    }
+    return shuffleList;
+}
+
 export function chunkList(list, size=10) {
     let chunks = []
     for (let a = 0; a < list.length; a += size) {
@@ -17,18 +33,26 @@ export function chunkList(list, size=10) {
 
 /***
  * Jquery style $
- * @param {string} cssSelector - CSS selector string
+ * @param {string} elementOrSelector - CSS selector string
  * @return {Element} - first matching Element
  * should probably just use jquery, its small enough. im just not clear on the other benefits
  * i just remembered i used it in the nominees portion, so itll be in later anyways
  * TODO delete this
  */
-export function $(cssSelector) {
-    return document.querySelector(cssSelector)
+export function $(elementOrSelector, selector=null) {
+    if (selector == null) {
+        return document.querySelector(elementOrSelector)
+    } else {
+        return elementOrSelector.querySelector(selector)
+    }
 }
 
-export function $$$(cssSelector) {
-    return document.querySelectorAll(cssSelector)
+export function $$$(elementOrSelector, selector=null) {
+    if (selector == null) {
+        return document.querySelectorAll(elementOrSelector)
+    } else {
+        return elementOrSelector.querySelectorAll(selector)
+    }
 }
 
 /***
@@ -62,4 +86,17 @@ export function objectSort(obj, member) {
 
 export function utcNow() {
     return Math.floor(new Date().getTime() / 1000)
+}
+
+export function Song() {
+    return {
+        title: '',
+        composer: '',
+        game: '',
+        year: '',
+        soundFile: '',
+        startTime: '',
+        albumImg: '',
+        backgroundImg: ''
+    }
 }

@@ -1,7 +1,7 @@
 //#region electron/preload.js
 var contextBridge = require("electron").contextBridge;
 var ipcRenderer = require("electron").ipcRenderer;
-contextBridge.exposeInMainWorld("eapi", {
+contextBridge.exposeInMainWorld("nodejs", {
 	send: (channel, data) => {
 		ipcRenderer.send(channel, data);
 	},
@@ -9,9 +9,8 @@ contextBridge.exposeInMainWorld("eapi", {
 		ipcRenderer.on(channel, (event, ...args) => func(...args));
 	},
 	call: (channel, args) => {
-		console.log("the preload");
+		console.log("nodejs api call: ", channel);
 		return ipcRenderer.invoke(channel, args);
 	}
 });
-console.log("preload");
 //#endregion

@@ -1,7 +1,9 @@
 {
-  "soundLocation": "sounds",
-  "bgLocation": "bgs",
-  "albumArtLocation": "albums",
+  "dataLocation": "C:\\Users\\tybro\\Projects\\buns-music-game\\data",
+  "dataFile": "",
+  "soundLocation": "",
+  "bgLocation": "",
+  "albumArtLocation": "",
   "music": {
     "jrpg": [
       {

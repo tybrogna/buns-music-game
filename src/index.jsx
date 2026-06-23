@@ -1,9 +1,9 @@
 import { render } from 'preact'
 import { LocationProvider, Router, lazy } from 'preact-iso'
 
-const Landing = lazy(() => import('./landing.jsx'))
-const Game = lazy(() => import('./game.jsx'))
-const DataViewer = lazy(() => import('./dataViewer.jsx'))
+const Landing = lazy(() => import('./pages/landing.jsx'))
+const Game = lazy(() => import('./pages/game.jsx'))
+const DataViewer = lazy(() => import('./pages/dataViewer.jsx'))
 
 let App = () => (
     <LocationProvider>

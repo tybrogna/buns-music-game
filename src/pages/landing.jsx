@@ -1,8 +1,8 @@
 import { render } from 'preact'
 import { useState, useEffect } from 'preact/hooks'
-import { $, $$$, range } from './helpers.js'
-import * as Settings from './settings.js'
-import './landing.css'
+import { $, $$$, range } from '../js/helpers.js'
+import * as Settings from '../settings.js'
+import '../css/landing.css'
 
 function LogoBox(props) {
     return (
@@ -36,8 +36,6 @@ function TeamSetup(props) {
         }
     })
 
-    console.log('i see ', teams, ' teams')
-
     let Teams = range(teams).map(item => {
         return (
             <>
@@ -57,11 +55,39 @@ function TeamSetup(props) {
     )
 }
 
+function GameSelect() {
+    let [ gamesFound, setGamesFound ] = useState([])
+
+    let checkFolderForGames = async () => {
+        let filesInFolder = await window.nodejs.call('filesInFolder', './games')
+        setGamesFound(filesInFolder)
+    }
+
+    useEffect(async () => {
+        await checkFolderForGames()
+    }, [])
+
+    return (
+        <>
+        <input type="button" value="check for new games" onClick={checkFolderForGames} />
+        <select id='game-folder-select'>
+            {gamesFound.map((item) => {
+                return (
+                    <option value={item}>{item}</option>
+                )
+            })}
+        </select>
+        </>
+    )
+}
+
 function Landing() {
+
     return (
         <div id='shell'>
             <LogoBox />
             <TeamSetup />
+            <GameSelect />
             <a href='/files'>file viewer</a>
             <input type='button' value='Start Game' onclick={e => startGame()}/>
         </div>
@@ -70,10 +96,26 @@ function Landing() {
 
 function startGame(event) {
     let nodes = $$$('.team-name-textbox')
-    let teams = Array.from(nodes).map(node => node.value)
+    let teams = Array.from(nodes).map(node => { node.value.replace(',', '.') })
+    console.log(teams)
 
     nodes = $$$('.players-textbox')
-    let players = Array.from(nodes).map(node => node.value.split('\n'))
+    let players = Array.from(nodes).map((node, idx) => {
+        let splits = node.value.split('\n')
+        splits = splits.map(s => {
+            let s2 = s.replace(',', '.')
+            return teams[idx] + "|||" + s2
+        })
+        return splits
+    })
+    console.log(players)
+
+    let gameFolder = $('#game-folder-select').value
+
+    if (gameFolder == '') {
+        console.log("you have to select a game to play")
+        return
+    }
 
     if (teams.length != players.length) {
         console.log("a team is missing a name or players")
@@ -82,6 +124,7 @@ function startGame(event) {
 
     localStorage.setItem('teams', teams)
     localStorage.setItem('players', players)
+    localStorage.setItem('gameFolder', gameFolder)
     window.open('/game', '_self')
 }
 

@@ -1,0 +1,9 @@
+.temp-tile {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5px;
+    border: 2px black solid;
+    min-height: 5em;
+    width: 5em;
+}
