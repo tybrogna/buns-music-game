@@ -1,7 +1,8 @@
 import { render } from 'preact'
 import * as Settings from '../settings.js'
 import { useState, useEffect } from 'preact/hooks'
-import { $, $$$, range, Song, shuffle } from '../js/helpers.js'
+import { signal } from 'preact/signal'
+import { $, $$$, delay, range, Song, shuffle } from '../js/helpers.js'
 import '../css/game.css'
 
 let teams = {}
@@ -89,10 +90,7 @@ function CategoryTile(props) {
     let labelText = `${props.title} -- ${remaining}`
 
     let playSong = async (e) => {
-        console.log(e.target)
-        console.log(e.target.id)
         let categoryKey = e.target.id.substr(0, e.target.id.indexOf('-'))
-        console.log(categoryKey)
         props.selectFunc(categoryKey)
         if (remaining > 0) {
             setRemaining(remaining - 1)
@@ -114,30 +112,66 @@ function Teams() {
     let [score, setScore] = useState(0)
     let TeamColumns = Object.entries(teams).map(([name, players]) => {
         return (
-            <div class='border-1'>
-                {name}
-                <PlayerList players={players} />
-                {score}
+            <div class='team-container'>
+                <div class='team-info border-1'>
+                    <div class='team-label'>{name}</div>
+                    <PlayerList players={players} />
+                </div>
+                <div class='team-score border-2'>
+                    <input type='button' class='plus-button' value='+' />
+                    <div class='score-label'>{score}</div>
+                    <input type='button' class='minus-button' value='-' />
+                </div>
             </div>
         )
     })
 
     return (
-        <div class='teams border-3'>
-            {TeamColumns}
+        <div class='center-content'>
+            <div class='teams-zone border-3'>
+                {TeamColumns}
+            </div>
         </div>
     )
 }
 
 function PlayerList(props) {
+    let PlayerLabels = props.players.map((player) => {
+        return (
+            <div class='player-label'>
+                {player}
+            </div>
+        )
+    })
+
     return (
-        <div class='border-2'>
-            {props.players}
+        <div class='team-player-names border-2'>
+            {PlayerLabels}
         </div>
     )
 }
 
+let cd = signal(0)
+
 function MusicPlayer(props) {
+    let [countdown, setCountdown] = useState(0)
+    let [isFinished, setIsFinished] = useState(false)
+
+    useEffect(() => {
+        const intervalId = setInterval(() => setCountdown(countdown - 1), 1000)
+        return () => clearInterval(intervalId)
+    })
+
+    // useEffect(async () => {
+    //     console.log('using effect')
+    //     return
+    //     while (!isFinished && countdown > 0) {
+    //         await delay(1000)
+    //         setCountdown(countdown - 1)
+    //     }
+    //     setIsFinished(true)
+    // }, [countdown, isFinished])
+
     console.log(props.category)
     if (!(props.category in game.music)) {
         console.log('not a category')
@@ -150,12 +184,15 @@ function MusicPlayer(props) {
         console.log("out of songs to play")
         return
     }
+
+    setCountdown(10)
+
     songToPlay.played = true
     console.log(songToPlay)
 
     return (
-        <div>
-            {songToPlay.title}
+        <div style="margin: 20%;">
+            {songToPlay.title}, {countdown}
         </div>
     )
 }
