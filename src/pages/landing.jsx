@@ -89,6 +89,7 @@ function Landing() {
             <TeamSetup />
             <GameSelect />
             <a href='/files'>file viewer</a>
+            <a href='/music-test'>music test</a>
             <input type='button' value='Start Game' onclick={e => startGame()}/>
         </div>
     )

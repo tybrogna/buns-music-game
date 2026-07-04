@@ -11,9 +11,9 @@ let songsData = {}
 
 function testWrite(event) {
     let data = {}
-    data.soundLocation = "sounds"
-    data.bgLocation = "bgs"
-    data.albumArtLocation = "albums"
+    data.songsLocation = "songs"
+    data.albumArtsLocation = "album_art"
+    data.backgroundsLocation = "backgrounds"
     data.music = {
         "jrpg":[],
         "rts":[],
@@ -27,7 +27,7 @@ function testWrite(event) {
         "soundFile": "schala.mp3",
         "startTime": "0",
         "backgroundImg": "ct.jpg",
-        "albumImg": "ct.jpg"
+        "albumArtImg": "ct.jpg"
     })
     data.music.jrpg.push({
         "title": "A New Hope",
@@ -37,7 +37,7 @@ function testWrite(event) {
         "soundFile": "uldah.mp3",
         "startTime": "0",
         "backgroundImg": "uldah.jpg",
-        "albumImg": "xivarr.jpg"
+        "albumArtImg": "xivarr.jpg"
     })
     data.music.rts.push({
         "title": "Terran One",
@@ -47,7 +47,7 @@ function testWrite(event) {
         "soundFile": "terran.mp3",
         "startTime": "20",
         "backgroundImg": "starcraft.jpg",
-        "albumImg": "starcraft.jpg"
+        "albumArtImg": "starcraft.jpg"
     })
     data.music.rts.push({
         "title": "Hell March",
@@ -57,7 +57,7 @@ function testWrite(event) {
         "soundFile": "hellmarch.mp3",
         "startTime": "19",
         "backgroundImg": "cncra.jpg",
-        "albumImg": "cncra.jpg"
+        "albumArtImg": "cncra.jpg"
     })
     const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: 'application/json',
@@ -147,7 +147,7 @@ function SongRow(props) {
 	const [soundFile, setSoundFile] = useState(props.song.soundFile)
 	const [startTime, setStartTime] = useState(props.song.startTime)
 	const [background, setBackground] = useState(props.song.backgroundImg)
-	const [album, setAlbum] = useState(props.song.albumImg)
+	const [album, setAlbum] = useState(props.song.albumArtImg)
 
     let removeSong = (e) => {
         e.target.parentNode.parentNode.classList.add("deleted")
@@ -193,13 +193,13 @@ function DataViewer() {
     } else {
         return (
             <div>
-                <input type='button' value='--- REFRESH ---' onClick={e => window.location.reload()} />
+                {/* <input type='button' value='--- REFRESH ---' onClick={e => window.location.reload()} /> */}
                 <input type='button' value='write test file' onClick={e => testWrite()} />
                 <input type='file' value='open data file' accept='application/json' onChange={e => testRead(e.target)} />
                 <div>
-                    <label>Sound folder: {songsData.soundLocation}</label>
-                    <label>Album art folder: {songsData.albumArtLocation}</label>
-                    <label>Background image folder: {songsData.bgLocation}</label>
+                    <label>Sound folder: {songsData.songsLocation}</label>
+                    <label>Album art folder: {songsData.albumArtsLocation}</label>
+                    <label>Background image folder: {songsData.backgroundsLocation}</label>
                 </div>
                 <table>
                     <thead>
@@ -254,10 +254,11 @@ function saveData() {
         song.soundFile = $(row, '#tr-sound-file').value
         song.startTime = $(row, '#tr-start-time').value
         song.backgroundImg = $(row, '#tr-background').value
-        song.album = $(row, '#tr-album').value
+        song.albumArtImg = $(row, '#tr-album').value
         saveObj[category].songs.push(song)
     })
     console.log(saveObj)
+    // TODO finish this shit
 }
 
 function keylogger(e) {

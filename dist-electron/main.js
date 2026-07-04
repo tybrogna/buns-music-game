@@ -21,6 +21,10 @@ function createWindow() {
 	if (process.env.VITE_DEV_SERVER_URL) mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
 	else mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
 }
+ipcMain.handle("path.join", async (event, ...args) => {
+	console.log(args);
+	return path.join(args);
+});
 ipcMain.handle("test", async (event, folder) => {
 	return {
 		success: true,

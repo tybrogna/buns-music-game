@@ -30,6 +30,11 @@ function createWindow () {
     }
 }
 
+ipcMain.handle('path.join', async(event, ...args) => {
+    console.log(args)
+    return path.join(args)
+})
+
 ipcMain.handle('test', async (event, folder) => {
     return {success: true, data:'hello'}
 })

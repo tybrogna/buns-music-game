@@ -1,31 +1,50 @@
 import { render } from 'preact'
 import * as Settings from '../settings.js'
-import { useState, useEffect } from 'preact/hooks'
-import { signal } from 'preact/signal'
+import { useState, useEffect, useRef } from 'preact/hooks'
+// import { signal } from '@preact/signals'
 import { $, $$$, delay, range, Song, shuffle } from '../js/helpers.js'
+
 import '../css/game.css'
 
 let teams = {}
 let game = {}
 
+
 function GameScreen() {
     let [haveGame, setHaveGame] = useState(false)
-    let [selectedSong, setSelectedSong] = useState('')
+    let [activeCategory, setActiveCategory] = useState(null)
+    let [activeSong, setActiveSong] = useState(null)
 
     useEffect(async () => {
-        console.log('fetchin json data')
         let selectedGameFolder = localStorage.getItem('gameFolder')
+        // console.log(selectedGameFolder)
         let filesInFolder = await window.nodejs.call('filesInFolder', `./games/${selectedGameFolder}`)
-        let jsonFile = filesInFolder.filter(item => item.endsWith('.json'))[0]  // first json file in folder
-        let jsonData = await window.nodejs.call('readFile', `./games/${selectedGameFolder}/${jsonFile}`)
-        Object.entries(jsonData.music).forEach(([category, songs]) => {
-            // console.log(category)
-            songs.forEach(song => song.played = false)
+        let jsonFileLoc = filesInFolder.filter(item => item.endsWith('.json'))[0]  // first json file in folder
+        let jsonData = await window.nodejs.call('readFile', `./games/${selectedGameFolder}/${jsonFileLoc}`)
+        Object.entries(jsonData.music).forEach(([key, val]) => {
+            val.songs.forEach(song => song.played = false)
         })
         game = jsonData
+        game.songsLocation = `./games/${selectedGameFolder}/songs`
+        game.albumsLocation = `./games/${selectedGameFolder}/albums`
+        game.backgroundsLocation = `./games/${selectedGameFolder}/bgs`
         console.log(game)
         setHaveGame(true)
-    }, [])
+    }, []) //run only once
+
+    // claude helped with this one. needed help wrapping my head around how useEffect worked
+    //   the general idea is mine, send this function from here with the relevant data down to
+    //      the html location where they'll be needed
+    let selectCategory = (category) => {
+        let choices = unplayedSongs(category)
+        if (!choices || choices.length == 0)
+            return
+        let song = shuffle(choices)[0]
+        song.played = true
+        setActiveCategory(category)
+        setActiveSong(song)
+        $('#player-overlay').style.display = 'block'
+    }
 
     let openOverlay = (event) => {
         $('#player-overlay').style.display = 'block'
@@ -34,13 +53,25 @@ function GameScreen() {
     let closeOverlay = (event) => {
         console.log('closing overlay')
         $('#player-overlay').style.display = 'none'
-        let lastSongPlayed = unplayedSongs(selectedSong).length == 0
-        if (lastSongPlayed) {
-            console.log(selectedSong)
-            console.log($(`#${selectedSong}-tile`))
-            $(`#${selectedSong}-tile`).style.background = 'grey'
+
+        if (activeCategory && unplayedSongs(activeCategory).length == 0) {
+            $(`#${activeCategory}-tile`).style.background = 'grey'
         }
-        setSelectedSong('')
+
+        setActiveCategory(null)
+        setActiveSong(null)
+    }
+
+    let PlayerToggle = () => {
+        if (!activeSong) {
+            return (
+                <div>Loading...</div>
+            )
+        } else {
+            return (
+                <MusicPlayer song={activeSong} time={5} onClose={closeOverlay} />
+            )
+        }
     }
 
     if (!haveGame) {
@@ -48,15 +79,14 @@ function GameScreen() {
             <div>loading...</div>
         )
     } else {
-
+        console.log('game screen rerender')
         let categories = Object.keys(game.music)
         return (
             <div className='shell'>
-                <CategoryGrid categories={categories} selectFunc={setSelectedSong} />
-                <input type='button' value='overlay' onClick={openOverlay} />
+                <CategoryGrid categories={categories} selectFunc={selectCategory} />
                 <Teams />
                 <div id='player-overlay' onClick={closeOverlay}>
-                    <MusicPlayer category={selectedSong} />
+                    {PlayerToggle()}
                 </div>
             </div>
         )
@@ -82,23 +112,18 @@ function CategoryGrid(props) {
     )
 }
 
-// 
-
 function CategoryTile(props) {
-    let [remaining, setRemaining] = useState(unplayedSongs(props.title).length)
+    let remaining = unplayedSongs(props.title).length
     let id = props.title + '-tile'
     let labelText = `${props.title} -- ${remaining}`
 
-    let playSong = async (e) => {
-        let categoryKey = e.target.id.substr(0, e.target.id.indexOf('-'))
-        props.selectFunc(categoryKey)
-        if (remaining > 0) {
-            setRemaining(remaining - 1)
+    // when you click on a category tile, send the category title to the function passed down
+    //   this will open the overlay and play the song
+    let playSong = (e) => {
+        if (remaining <= 0) {
+            return
         }
-
-        if (remaining == 0) {
-            $(`#${categoryKey}-tile`).style.background = 'grey'
-        }
+        props.selectFunc(props.title)
     }
 
     return (
@@ -109,8 +134,8 @@ function CategoryTile(props) {
 }
 
 function Teams() {
-    let [score, setScore] = useState(0)
     let TeamColumns = Object.entries(teams).map(([name, players]) => {
+        let [score, setScore] = useState(0)
         return (
             <div class='team-container'>
                 <div class='team-info border-1'>
@@ -118,9 +143,11 @@ function Teams() {
                     <PlayerList players={players} />
                 </div>
                 <div class='team-score border-2'>
-                    <input type='button' class='plus-button' value='+' />
+                    <input type='button' class='plus-button' value='+' 
+                        onClick={e => setScore(score + 1)} />
                     <div class='score-label'>{score}</div>
-                    <input type='button' class='minus-button' value='-' />
+                    <input type='button' class='minus-button' value='-' 
+                        onClick={e => setScore(Math.max(0, score - 1))} />
                 </div>
             </div>
         )
@@ -151,60 +178,107 @@ function PlayerList(props) {
     )
 }
 
-let cd = signal(0)
-
+// claude helped with this one
+// a logical maze that starts the countdown, plays the song, and displays the information.
+//   i shudder at how readable it will be when i start to add css decoration
 function MusicPlayer(props) {
-    let [countdown, setCountdown] = useState(0)
-    let [isFinished, setIsFinished] = useState(false)
+    const [guessTimer, setGuessTimer] = useState(props.time)
+    const [songRevealed, setSongRevealed] = useState(false)
+    const [songPlaying, setSongPlaying] = useState(true)
+    const [countdown, setCountdown] = useState(game.countdown)
+    const [songFile, setSongFile] = useState('')
+    const audioRef = useRef(null)
 
-    useEffect(() => {
-        const intervalId = setInterval(() => setCountdown(countdown - 1), 1000)
-        return () => clearInterval(intervalId)
-    })
+    useEffect(async () => {
+        if (!songPlaying || songRevealed) {
+            return
+        }
 
-    // useEffect(async () => {
-    //     console.log('using effect')
-    //     return
-    //     while (!isFinished && countdown > 0) {
-    //         await delay(1000)
-    //         setCountdown(countdown - 1)
-    //     }
-    //     setIsFinished(true)
-    // }, [countdown, isFinished])
+        if (guessTimer <= 0) {
+            // setSongPlaying(false)
+            setSongRevealed(true)
+            return
+        }
 
-    console.log(props.category)
-    if (!(props.category in game.music)) {
-        console.log('not a category')
-        return
-    }
+        let timer = setTimeout(() => {
+            if (countdown >= 0) {
+                setCountdown(time => time - .1)
+            } else {
+                setGuessTimer(time => time - .1)
+            }
+        }, 100);
+    }, [countdown, guessTimer, songPlaying, songRevealed]) //when countdown, ticking, or songRevealed change, run this
 
-    let songToPlay = shuffle(unplayedSongs(props.category))[0]
-    if (songToPlay == undefined) {
-        // $(`#${props.category}-tile`).style.background = 'grey'
-        console.log("out of songs to play")
-        return
-    }
-
-    setCountdown(10)
-
-    songToPlay.played = true
-    console.log(songToPlay)
+    useEffect(async () => {
+        console.log('[T] songPlaying was triggered, so im going to....')
+        let audio = audioRef.current
+        let songUri = createSongUri(props.song)
+        setSongFile(songUri)
+        if (countdown <= 0 && songPlaying) {
+            audio.play() //;console.log('[T] play a song')
+        } else {
+            audio.pause() //;console.log('[T] the song is over or paused')
+        }
+    }, [countdown, songPlaying]) //when songPlaying or pre changes, run this
 
     return (
-        <div style="margin: 20%;">
-            {songToPlay.title}, {countdown}
+        <div class='border-2' style="margin: 20%;" onclick={e => e.stopPropagation()}>
+            <div class="">{countdown.toFixed(1)}</div>
+            <div class="">{guessTimer.toFixed(1)}</div>
+            <audio ref={audioRef} src={songFile} controls/>
+            <input type='button' value='play/pause' onClick={e => setSongPlaying(!songPlaying)} />
+            <SongInfo songRevealed={songRevealed} song={props.song} />
         </div>
     )
 }
 
+function SongInfo(props) {
+    let [autoReveal, setAutoReveal] = useState(game.autoReveal)
+    if (props.songRevealed && autoReveal) {
+        return (
+            <div>
+                <div>Title: {props.song.title}</div>
+                {/* <div>Composer: {props.song.md1}</div> */}
+                <div>Composer: {props.song.composer}</div>
+                {/* <div>Game: {props.song.md2}</div> */}
+                <div>Game: {props.song.game}</div>
+                <div>Release Year: {props.song.year}</div>
+            </div>
+        )
+    } else {
+        if (!autoReveal) {
+            return (
+                <input type='button' value='reveal' onClick={e => setAutoReveal(true)} />
+            )
+        } else {
+            return (<div></div>)
+        }
+    }
+}
+
 function unplayedSongs(category) {
-    return game.music[category].filter(song => !song.played)
+    if (category == null || category == "")
+        return
+    return game.music[category].songs.filter(song => !song.played)
 }
 
 function defaultTeams() {
     let teams = "east side,west side"
     let players = 'east side|||notorious B.I.G.,east side|||puff daddy,west side|||2Pac,west side|||dr dre'
     return [teams,players]
+}
+
+function createSongUri(song) {
+    let minAt = Math.floor(song.startTime / 60)
+    if (minAt < 10) {
+        minAt = "0" + minAt
+    }
+    let secAt = song.startTime % 60
+    if (secAt < 10) {
+        secAt = "0" + secAt
+    }
+    let playAt = `t=00:${minAt}:${secAt}`
+    return game.songsLocation + "/" + song.soundFile + "#" + playAt
 }
 
 export default function() {
@@ -219,6 +293,8 @@ export default function() {
         let [t, name] = player.split('|||')
         teams[t].push(name)
     })
+
+    console.log('THE CLAUDE VERSION')
 
     // console.log(teams)
     // console.log(players)
