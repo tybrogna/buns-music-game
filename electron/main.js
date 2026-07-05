@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { readFile, readdir } from 'fs/promises'
+import { readFile, readdir, writeFile } from 'fs/promises'
 import { fileURLToPath } from 'url';
 import path from 'path';
 //stolen from
@@ -52,6 +52,14 @@ ipcMain.handle('readFile', async (event, file) => {
         let data = await readFile(file)
         return await JSON.parse(data)
     } catch (err) { console.log(err); return '' }
+})
+
+ipcMain.handle('writeFile', async (event, file, data) => {
+    try {
+        await writeFile(file, data)
+    } catch (err) {
+        console.log(err)
+    }
 })
 
 app.whenReady().then(() => {

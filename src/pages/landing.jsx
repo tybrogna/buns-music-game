@@ -132,3 +132,8 @@ function startGame(event) {
 export default function() {
     render(Landing(), document.body)
 }
+
+//todo: delete the unnecessary setup files
+//      splash logo
+//      css for buttons
+//      animations for buttons

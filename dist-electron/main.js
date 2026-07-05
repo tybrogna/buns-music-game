@@ -1,5 +1,5 @@
 import { BrowserWindow, app, ipcMain } from "electron";
-import { readFile, readdir } from "fs/promises";
+import { readFile, readdir, writeFile } from "fs/promises";
 import { fileURLToPath } from "url";
 import path from "path";
 //#region electron/main.js
@@ -48,6 +48,13 @@ ipcMain.handle("readFile", async (event, file) => {
 	} catch (err) {
 		console.log(err);
 		return "";
+	}
+});
+ipcMain.handle("writeFile", async (event, file, data) => {
+	try {
+		await writeFile(file, data);
+	} catch (err) {
+		console.log(err);
 	}
 });
 app.whenReady().then(() => {}).then(createWindow);

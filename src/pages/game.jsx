@@ -294,8 +294,6 @@ export default function() {
         teams[t].push(name)
     })
 
-    console.log('THE CLAUDE VERSION')
-
     // console.log(teams)
     // console.log(players)
     // console.log(gameFolder)
@@ -303,3 +301,12 @@ export default function() {
     // console.log('rendering page')
     render(GameScreen(), document.body)
 }
+
+//todo: add images
+//      css for catagories
+//      css for player
+//      css for teams
+//      animations for categories
+//      animations for music player
+//      animations for teams
+//      game/music industry mode

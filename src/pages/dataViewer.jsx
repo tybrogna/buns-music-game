@@ -168,11 +168,43 @@ function SongRow(props) {
     )
 }
 
+function GameSelect(props) {
+    let [ gamesFound, setGamesFound ] = useState([])
+
+    let checkFolderForGames = async () => {
+        let filesInFolder = await window.nodejs.call('filesInFolder', './games')
+        setGamesFound(filesInFolder)
+    }
+
+    useEffect(async () => {
+        await checkFolderForGames()
+    }, [])
+
+    return (
+        <>
+        <input type="button" value="check for new games" onClick={checkFolderForGames} />
+        <select id='game-folder-select' onChange={props.loadGameJson}>
+            <option value=''></option>
+            {gamesFound.map((item) => {
+                return (
+                    <option value={item}>{item}</option>
+                )
+            })}
+        </select>
+        </>
+    )
+}
+
 function DataViewer() {
     let [haveJson, setHaveJson] = useState(false)
 
     let testRead = async function(target) {
-        let filesInFolder = await window.nodejs.call('filesInFolder', $('#data-location-box').value)
+        if (haveJson) {
+            songsData = null
+            setHaveJson(false)
+        }
+        let selectedGame = $('#game-folder-select').value
+        let filesInFolder = await window.nodejs.call('filesInFolder', `./games/${selectedGame}`)
         let jsonFile = filesInFolder.filter(item => item.endsWith('.json'))[0]  // first json file in folder
         let jsonData = await window.nodejs.call('readFile', defaultLocation + '/' + jsonFile)
         songsData = jsonData
@@ -182,44 +214,66 @@ function DataViewer() {
     if (!haveJson) {
         return (
             <div>
-                <input id='data-location-box' type='text' value={defaultLocation} />
-                <input type='button' value='console.log teams' onClick={e => console.log(localStorage.getItem('teams'))} />
-                <input type='button' value='console.log players' onClick={e => console.log(localStorage.getItem('players'))} />
-                <input type='button' value='check folder' onClick={e => testBridge()} />
-                <input type='button' value='write test file' onClick={e => testWrite()} />
-                <input type='button' value='scan default folder' onClick={e => testRead()} />
+                <GameSelect loadGameJson={testRead} />
+                {/* <input id='data-location-box' type='text' value={defaultLocation} /> */}
+                {/* <input type='button' value='console.log teams' onClick={e => console.log(localStorage.getItem('teams'))} /> */}
+                {/* <input type='button' value='console.log players' onClick={e => console.log(localStorage.getItem('players'))} /> */}
+                {/* <input type='button' value='check folder' onClick={e => testBridge()} /> */}
+                {/* <input type='button' value='write test file' onClick={e => testWrite()} /> */}
+                {/* <input type='button' value='scan default folder' onClick={e => testRead()} /> */}
             </div>
         )
     } else {
         return (
             <div>
+                <GameSelect loadGameJson={testRead} />
                 {/* <input type='button' value='--- REFRESH ---' onClick={e => window.location.reload()} /> */}
                 <input type='button' value='write test file' onClick={e => testWrite()} />
                 <input type='file' value='open data file' accept='application/json' onChange={e => testRead(e.target)} />
-                <div>
-                    <label>Sound folder: {songsData.songsLocation}</label>
-                    <label>Album art folder: {songsData.albumArtsLocation}</label>
-                    <label>Background image folder: {songsData.backgroundsLocation}</label>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>delete</th>
-                            <th>title</th>
-                            <th>composer</th>
-                            <th>game</th>
-                            <th>year</th>
-                            <th>sound file</th>
-                            <th>start time</th>
-                            <th>album image</th>
-                            <th>background image</th>
-                        </tr>
-                    </thead>
-                    <DataTableRows songsData={songsData} />
-                    <tfoot>
-                        <tr>SAVE AFTER EDITING</tr>
-                    </tfoot>
-                </table>
+                <fieldset>
+                    <legend>Game Rules</legend>
+                    <div>
+                        <label for='countdown'>Countdown between selecting a category and song starts playing:</label>
+                        <input name='coundown' type='text' value={songsData.countdown} />
+                    </div>
+                    <div>
+                        <input name='autoReveal' type='checkbox' checked={songsData.autoReveal} />
+                        <label for='autoReveal'>Auto Reveal Song Info?</label>
+                    </div>
+                    <div>
+                        <label for='gameType'>Metadata Labels</label>
+                        <select>
+                            <option>Use Game/Composer</option>
+                            <option>Use Album/Band</option>
+                        </select>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Categories and Songs</legend>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>delete</th>
+                                <th>title</th>
+                                <th>composer</th>
+                                <th>game</th>
+                                <th>year</th>
+                                <th>sound file</th>
+                                <th>start time</th>
+                                <th>album image</th>
+                                <th>background image</th>
+                            </tr>
+                        </thead>
+                        <DataTableRows songsData={songsData} />
+                        <tfoot>
+                            <tr>
+                                <td>SAVE</td>
+                                <td>AFTER</td>
+                                <td>EDITING</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </fieldset>
             </div>
         )
     }
@@ -271,3 +325,9 @@ export default function() {
     window.addEventListener('keydown', keylogger)
     render(DataViewer(), document.body)
 }
+
+//todo: new category button
+//      update song data type in helpers.js
+//      add duration
+//      actually save file
+//      game/music industry mode
