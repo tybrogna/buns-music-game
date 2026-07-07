@@ -501,6 +501,6 @@ export default function() {
 //      DONE update song data type in helpers.js
 //      DONE add duration
 //      DONE scan folders for objs, update inputs with searchable dropdowns
-//      actually save file
-//      game/music industry mode
+//      DONE actually save file
+//      DONE game/music industry mode
 //      css
