@@ -28,6 +28,22 @@ function GameScreen() {
         game.songsLocation = `./games/${selectedGameFolder}/songs`
         game.albumsLocation = `./games/${selectedGameFolder}/albums`
         game.backgroundsLocation = `./games/${selectedGameFolder}/bgs`
+        game.music.forEach(category => {
+            category.songs.forEach(song => {
+                if (song.composer == null) {
+                    song.composer = ""
+                }
+                if (song.game == null) {
+                    song.game = ""
+                }
+                if (song.artist == null) {
+                    song.artist = ""
+                }
+                if (song.album == null) {
+                    song.album = ""
+                }
+            })
+        })
         console.log(game)
         setHaveGame(true)
     }, []) //run only once
@@ -51,7 +67,6 @@ function GameScreen() {
     }
 
     let closeOverlay = (event) => {
-        console.log('closing overlay')
         $('#player-overlay').style.display = 'none'
 
         if (activeCategory && unplayedSongs(activeCategory).length == 0) {
@@ -68,8 +83,12 @@ function GameScreen() {
                 <div>Loading...</div>
             )
         } else {
+            let guessDuration = game.defaultDuration
+            if (activeSong.duration) {
+                guessDuration = activeSong.duration
+            }
             return (
-                <MusicPlayer song={activeSong} time={5} onClose={closeOverlay} />
+                <MusicPlayer song={activeSong} time={guessDuration} onClose={closeOverlay} />
             )
         }
     }
@@ -80,7 +99,7 @@ function GameScreen() {
         )
     } else {
         console.log('game screen rerender')
-        let categories = Object.keys(game.music)
+        let categories = game.music.map(cat => cat.name)
         return (
             <div className='shell'>
                 <CategoryGrid categories={categories} selectFunc={selectCategory} />
@@ -234,17 +253,42 @@ function MusicPlayer(props) {
 
 function SongInfo(props) {
     let [autoReveal, setAutoReveal] = useState(game.autoReveal)
+
+    let InfoBlock = () => {
+        if (game.style == 'game') {
+            return (
+                <div>
+                    <div>Title: {props.song.title}</div>
+                    <div>Composer: {props.song.composer}</div>
+                    <div>Game: {props.song.game}</div>
+                    <div>Release Year: {props.song.year}</div>
+                </div>
+            )
+        } else if (game.style == 'music') {
+            return (
+                <div>
+                    <div>Artist: {props.song.artist}</div>
+                    <div>Album: {props.song.album}</div>
+                    <div>Game: {props.song.game}</div>
+                    <div>Release Year: {props.song.year}</div>
+                </div>
+            )
+        } else {
+            return (
+                <div>
+                    <div>Title: {props.song.title}</div>
+                    <div>Artist: {props.song.artist}</div>
+                    <div>Composer: {props.song.composer}</div>
+                    <div>Album: {props.song.album}</div>
+                    <div>Game: {props.song.game}</div>
+                    <div>Release Year: {props.song.year}</div>
+                </div>
+            )
+        }
+    }
+
     if (props.songRevealed && autoReveal) {
-        return (
-            <div>
-                <div>Title: {props.song.title}</div>
-                {/* <div>Composer: {props.song.md1}</div> */}
-                <div>Composer: {props.song.composer}</div>
-                {/* <div>Game: {props.song.md2}</div> */}
-                <div>Game: {props.song.game}</div>
-                <div>Release Year: {props.song.year}</div>
-            </div>
-        )
+        return InfoBlock()
     } else {
         if (!autoReveal) {
             return (
@@ -257,9 +301,10 @@ function SongInfo(props) {
 }
 
 function unplayedSongs(category) {
-    if (category == null || category == "")
+    if (game == null || game.music == null ||category == null || category == "")
         return
-    return game.music[category].songs.filter(song => !song.played)
+    let cat = game.music.filter(cat => cat.name == category)[0]
+    return cat.songs.filter(song => !song.played)
 }
 
 function defaultTeams() {

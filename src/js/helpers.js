@@ -88,14 +88,24 @@ export function utcNow() {
     return Math.floor(new Date().getTime() / 1000)
 }
 
+export function Category() {
+    return {
+        tileImg: "",
+        songs: []
+    }
+}
+
 export function Song() {
     return {
         title: '',
         composer: '',
         game: '',
+        artist: '',
+        album: '',
         year: '',
         soundFile: '',
         startTime: '',
+        duration: '',
         albumImg: '',
         backgroundImg: ''
     }

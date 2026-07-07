@@ -42,7 +42,6 @@ ipcMain.handle('test', async (event, folder) => {
 ipcMain.handle('filesInFolder', async (event, folder) => {
     try {
         let files = await readdir(folder)
-        files.forEach(f => console.log(f))
         return files
     } catch (err) { console.log(err); return '' }
 })
@@ -54,9 +53,9 @@ ipcMain.handle('readFile', async (event, file) => {
     } catch (err) { console.log(err); return '' }
 })
 
-ipcMain.handle('writeFile', async (event, file, data) => {
+ipcMain.handle('writeFile', async (event, args) => {
     try {
-        await writeFile(file, data)
+        await writeFile(args[0], JSON.stringify(args[1]))
     } catch (err) {
         console.log(err)
     }

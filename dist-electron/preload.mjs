@@ -9,7 +9,6 @@ contextBridge.exposeInMainWorld("nodejs", {
 		ipcRenderer.on(channel, (event, ...args) => func(...args));
 	},
 	call: (channel, args) => {
-		console.log("nodejs api call: ", channel);
 		return ipcRenderer.invoke(channel, args);
 	}
 });
